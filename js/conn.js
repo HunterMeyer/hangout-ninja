@@ -51,7 +51,7 @@ document.getElementById('btn-leave-room').onclick = function() {
     connection.leave();
   }
 
-  window.location = '/index.html';
+  window.location = '/';
 };
 
 function stateChangeEnable() {
@@ -208,7 +208,7 @@ connection.onEntireSessionClosed = function(event) {
   document.getElementById('alert').innerHTML = 'Master Ninja has ended the session';
 
   setTimeout(function() {
-   window.location = '/index.html';
+   window.location = '/';
   }, 5000);
   // document.querySelector('h1').innerHTML = 'Entire session has been closed by the moderator: ' + event.userid; // HUNTER
 };
