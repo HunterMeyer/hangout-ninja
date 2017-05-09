@@ -248,11 +248,11 @@ function showRoomURL(roomid) {
 })();
 
 var roomid = params.roomid;
-if (!roomid && localStorage.getItem(connection.socketMessageEvent)) {
-  roomid = localStorage.getItem(connection.socketMessageEvent);
-} else {
+// if (!roomid && localStorage.getItem(connection.socketMessageEvent)) {
+  // roomid = localStorage.getItem(connection.socketMessageEvent);
+// } else {
   // roomid = connection.token(); // HUNTER
-}
+// }
 // if (roomid) { document.getElementById('room-id').value = roomid; }
 // document.getElementById('room-id').onkeyup = function() {
 //   localStorage.setItem(connection.socketMessageEvent, this.value);
@@ -260,7 +260,7 @@ if (!roomid && localStorage.getItem(connection.socketMessageEvent)) {
 
 if(roomid && roomid.length) {
   document.getElementById('room-id').value = roomid;
-  localStorage.setItem(connection.socketMessageEvent, roomid);
+  // localStorage.setItem(connection.socketMessageEvent, roomid);
 
   // auto-join-room
   (function reCheckRoomPresence() {
