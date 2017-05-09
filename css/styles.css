@@ -12,7 +12,7 @@ body {
 
 #welcome {
   position: relative;
-  top: 30%;
+  top: 20%;
   /*transform: translateY(-30%);*/
 }
 #welcome h2 { text-shadow: 0px 2px 5px #2a3588; margin-bottom: 2rem; }
