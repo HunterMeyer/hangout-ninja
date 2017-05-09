@@ -253,7 +253,7 @@ if (!roomid && localStorage.getItem(connection.socketMessageEvent)) {
 } else {
   // roomid = connection.token(); // HUNTER
 }
-document.getElementById('room-id').value = roomid;
+// if (roomid) { document.getElementById('room-id').value = roomid; }
 // document.getElementById('room-id').onkeyup = function() {
 //   localStorage.setItem(connection.socketMessageEvent, this.value);
 // };
