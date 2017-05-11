@@ -86,13 +86,13 @@ document.getElementById('input-text-chat').onkeyup = function(e) {
   if (!this.value.length) return;
 
   connection.send(this.value);
-  appendDIV(this.value);
+  addMessageToChat(this.value);
   this.value = '';
 };
 
 var chatContainer = document.getElementById('chat-output');
 
-function appendDIV(event) {
+function addMessageToChat(event) {
   var tile = document.createElement('div');
   tile.className = 'tile';
   var content = document.createElement('div');
@@ -165,7 +165,7 @@ connection.onstreamended = function(event) {
   }
 };
 
-connection.onmessage = appendDIV;
+connection.onmessage = addMessageToChat;
 // connection.filesContainer = document.getElementById('file-container'); // HUNTER
 
 connection.onopen = function() {
