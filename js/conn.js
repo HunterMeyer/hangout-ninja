@@ -19,10 +19,13 @@ function applySizingHandler() {
 
 document.getElementById('join-room').onsubmit = function(e) {
   e.preventDefault();
-  connection.open(document.getElementById('room-id').value, function() {
-    showRoomURL(connection.sessionid);
-    stateChangeEnable();
-  });
+  var room_id = document.getElementById('room-id').value;
+  if (room_id) {
+    connection.open(room_id, function() {
+      showRoomURL(connection.sessionid);
+      stateChangeEnable();
+    });
+  }
   return false;
 };
 
