@@ -21,9 +21,10 @@ document.getElementById('join-room').onsubmit = function(e) {
   e.preventDefault();
   var room_id = document.getElementById('room-id').value;
   if (room_id) {
+    room_id = room_id.toLowerCase();
+    showRoomURL(room_id);
     stateChangeEnable();
-    connection.openOrJoin(room_id, function(_isExistingRoom, roomid) {
-      showRoomURL(roomid);
+    connection.openOrJoin(room_id, function(_isExistingRoom, _roomid) {
       connection.extra.user = randomUser();
     });
   }
@@ -235,12 +236,12 @@ function disableInputButtons() {
 // ......................................................
 
 function showRoomURL(roomid) {
-  var roomQueryStringURL = '?roomid=' + roomid;
-  var html = '<span class="pr-5">Room Link:</span>'
-
-  html += '<a href="' + roomQueryStringURL + '" target="_blank">' + roomQueryStringURL + '</a>';
-  var roomURLsDiv = document.getElementById('room-url');
-  roomURLsDiv.innerHTML = html;
+  var roomurl = '?roomid=' + roomid;
+  var wrapper = document.getElementById('room-url');
+  var html = "<div class='pt-5 pb-5'>\
+                <a href='" + roomurl + "' target='_blank'>" + roomid + "</a>\
+              </div>";
+  wrapper.innerHTML = html;
 }
 
 (function() {
@@ -259,6 +260,7 @@ function showRoomURL(roomid) {
 var roomid = params.roomid;
 
 if(roomid && roomid.length) {
+  roomid = roomid.toLowerCase();
   document.getElementById('room-id').value = roomid;
   // roomid = localStorage.getItem(connection.socketMessageEvent);
   // localStorage.setItem(connection.socketMessageEvent, roomid);
@@ -267,10 +269,10 @@ if(roomid && roomid.length) {
   (function reCheckRoomPresence() {
     connection.checkPresence(roomid, function(isRoomExists) {
       if(isRoomExists) {
+        showRoomURL(roomid);
         stateChangeEnable();
         connection.join(roomid, function() {
           connection.extra.user = randomUser();
-          showRoomURL(roomid);
         });
         return;
       }
