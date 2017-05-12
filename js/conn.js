@@ -144,6 +144,19 @@ connection.session = {
   data: true
 };
 
+connection.mediaConstraints = {
+  video: true,
+  audio: {
+    mandatory: {
+      echoCancellation: true,
+      googAutoGainControl: true,
+      googNoiseSuppression: true,
+      googHighpassFilter: true,
+      googTypingNoiseDetection: true
+    }
+  }
+}
+
 connection.sdpConstraints.mandatory = {
   OfferToReceiveAudio: true,
   OfferToReceiveVideo: true
