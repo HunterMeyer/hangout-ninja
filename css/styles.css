@@ -24,6 +24,8 @@ body {
 .panel { background: #fff; }
 .tile { border-bottom: .1rem dashed #cbd1ff; }
 .tile, .tile-content { margin-bottom: 1rem; }
+.chat-author { color: #d3d8fb; } /* light-purple */
+
 
 .footer {
   position: absolute;

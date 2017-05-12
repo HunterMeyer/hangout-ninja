@@ -1,17 +1,17 @@
 // Click events for sizing the videos
-function applySizingHandler() {
-  var videos = document.getElementsByClassName('media-container');
-  for (var i = 0; i < videos.length; i++) {
-    videos[i].addEventListener('click', function() {
-      var current = this.style.width;
-      if (current === '100%') {
-        this.style.width = '25%';
-      } else {
-        this.style.width = '100%';
-      }
-    }, false);
-  }
-}
+// function applySizingHandler() {
+//   var videos = document.getElementsByClassName('media-container');
+//   for (var i = 0; i < videos.length; i++) {
+//     videos[i].addEventListener('click', function() {
+//       var current = this.style.width;
+//       if (current === '100%') {
+//         this.style.width = '25%';
+//       } else {
+//         this.style.width = '100%';
+//       }
+//     }, false);
+//   }
+// }
 
 // ......................................................
 // .......................UI Code........................
@@ -21,35 +21,38 @@ document.getElementById('join-room').onsubmit = function(e) {
   e.preventDefault();
   var room_id = document.getElementById('room-id').value;
   if (room_id) {
-    connection.open(room_id, function() {
-      showRoomURL(connection.sessionid);
-      stateChangeEnable();
+    stateChangeEnable();
+    connection.openOrJoin(room_id, function(_isExistingRoom, roomid) {
+      showRoomURL(roomid);
+      connection.extra.user = randomUser();
     });
   }
   return false;
-};
+}
 
-// document.getElementById('join-room').onclick = function() {
-//   disableInputButtons();
-//   connection.join(document.getElementById('room-id').value);
-// };
+document.getElementById('change-username').onsubmit = function(e) {
+  e.preventDefault();
+  var username = document.getElementById('new-username').value;
+  if (username) {
+    this.className += ' hide';
+    connection.extra.modifiedValue = 'username';
+    connection.extra.user.name = username;
+    updateUserChatName(connection.extra.user);
+    connection.updateExtraData();
+  }
+  return false;
+}
 
-// document.getElementById('open-or-join-room').onclick = function() {
-//     disableInputButtons();
-//     connection.openOrJoin(document.getElementById('room-id').value, function(isRoomExists, roomid) {
-//         if(!isRoomExists) {
-//             showRoomURL(roomid);
-//         }
-//     });
-// };
+function randomUser() {
+  var value = Math.floor(Math.random() * 426468864654);
+  return { id: value, name: value };
+}
 
 document.getElementById('btn-leave-room').onclick = function() {
   if(connection.isInitiator) {
     // use this method if you did NOT set "autoCloseEntireSession===true"
     // for more info: https://github.com/muaz-khan/RTCMultiConnection#closeentiresession
-    connection.closeEntireSession(function() {
-      // document.querySelector('h1').innerHTML = 'Entire session has been closed.'; // HUNTER
-    });
+    connection.closeEntireSession();
   } else {
     connection.leave();
   }
@@ -85,25 +88,37 @@ document.getElementById('input-text-chat').onkeyup = function(e) {
   this.value = this.value.replace(/^\s+|\s+$/g, '');
   if (!this.value.length) return;
 
-  connection.send(this.value);
-  addMessageToChat(this.value);
+  message = { from: connection.extra.user, body: this.value };
+  connection.send(message);
+  addMessageToChat(message);
   this.value = '';
 };
 
 var chatContainer = document.getElementById('chat-output');
 
-function addMessageToChat(event) {
+function addMessageToChat(message) {
+  var user = message.from || message.data.from;
+  var body = message.body || message.data.body;
   var tile = document.createElement('div');
   tile.className = 'tile';
-  var content = document.createElement('div');
-  content.className = 'tile-content';
-  content.innerHTML = event.data || event;
-  tile.appendChild(content);
+
+  var html = "<div class='tile-content'>\
+                <div>" + body + "</div>\
+                <small class='chat-author' data-userid='" + user.id + "'>" + user.name + "</small>\
+              </div>";
+  tile.innerHTML = html;
   tile.tabIndex = 0;
   chatContainer.appendChild(tile);
   tile.focus();
 
   document.getElementById('input-text-chat').focus();
+}
+
+function updateUserChatName(user) {
+  chats = document.querySelectorAll(".chat-author[data-userid='" + user.id + "']");
+  for (var i = 0; i < chats.length; i++) {
+    chats[i].innerHTML = user.name;
+  }
 }
 
 // ......................................................
@@ -135,8 +150,8 @@ connection.sdpConstraints.mandatory = {
 
 connection.videosContainer = document.getElementById('videos-container');
 connection.onstream = function(event) {
-  // var width = parseInt(connection.videosContainer.clientWidth / 2) - 20; // HUNTER
-  var width = '25%';
+  var width = parseInt(connection.videosContainer.clientWidth / 2) - 20; // HUNTER
+  // var width = '25%';
   var mediaElement = getMediaElement(event.mediaElement, {
     title: event.userid,
     // buttons: ['full-screen'], // HUNTER
@@ -152,10 +167,6 @@ connection.onstream = function(event) {
   }, 5000);
 
   mediaElement.id = event.streamid;
-
-  showRoomURL(connection.sessionid);
-
-  applySizingHandler();
 };
 
 connection.onstreamended = function(event) {
@@ -168,13 +179,8 @@ connection.onstreamended = function(event) {
 connection.onmessage = addMessageToChat;
 // connection.filesContainer = document.getElementById('file-container'); // HUNTER
 
-connection.onopen = function() {
-  // document.getElementById('share-file').disabled = false; // HUNTER
-  // document.getElementById('input-text-chat').disabled = false;
-  // document.getElementById('btn-leave-room').disabled = false; // HUNTER
-  // document.getElementById('btn-leave-room').classList.remove('hide'); // HUNTER
-  // document.getElementById('connect-room').className += ' hide'; // HUNTER
-
+// When a new user joins...
+connection.onopen = function(event) {
   // document.querySelector('h1').innerHTML = 'You are connected with: ' + connection.getAllParticipants().join(', '); // HUNTER
 };
 
@@ -187,17 +193,6 @@ connection.onclose = function() {
 };
 
 connection.onEntireSessionClosed = function(event) {
-  // document.getElementById('share-file').disabled = true; // HUNTER
-  // document.getElementById('input-text-chat').disabled = true;
-  // document.getElementById('btn-leave-room').disabled = true; // HUNTER
-  // document.getElementById('btn-leave-room').className += ' hide'; // HUNTER 
-
-  // document.getElementById('open-or-join-room').disabled = false; // HUNTER
-  // document.getElementById('connect-room').classList.remove('hide'); // HUNTER
-  // document.getElementById('open-room').disabled = false; // HUNTER
-  // document.getElementById('join-room').disabled = false; // HUNTER
-  // document.getElementById('room-id').disabled = false; // HUNTER
-
   connection.attachStreams.forEach(function(stream) {
     stream.stop();
   });
@@ -213,7 +208,6 @@ connection.onEntireSessionClosed = function(event) {
   setTimeout(function() {
    window.location = '/';
   }, 5000);
-  // document.querySelector('h1').innerHTML = 'Entire session has been closed by the moderator: ' + event.userid; // HUNTER
 };
 
 connection.onUserIdAlreadyTaken = function(useridAlreadyTaken, yourNewUserId) {
@@ -221,8 +215,20 @@ connection.onUserIdAlreadyTaken = function(useridAlreadyTaken, yourNewUserId) {
   connection.join(useridAlreadyTaken);
 };
 
+connection.onExtraDataUpdated = function(event) {
+  var modifiedValue = event.extra.modifiedValue;
+  switch (modifiedValue) {
+    case 'username':
+      updateUserChatName(event.extra.user);
+      break;
+    default:
+      // undhandled modifiedValue
+  }
+};
+
 function disableInputButtons() {
 }
+
 
 // ......................................................
 // ......................Handling Room-ID................
@@ -251,32 +257,25 @@ function showRoomURL(roomid) {
 })();
 
 var roomid = params.roomid;
-// if (!roomid && localStorage.getItem(connection.socketMessageEvent)) {
-  // roomid = localStorage.getItem(connection.socketMessageEvent);
-// } else {
-  // roomid = connection.token(); // HUNTER
-// }
-// if (roomid) { document.getElementById('room-id').value = roomid; }
-// document.getElementById('room-id').onkeyup = function() {
-//   localStorage.setItem(connection.socketMessageEvent, this.value);
-// };
 
 if(roomid && roomid.length) {
   document.getElementById('room-id').value = roomid;
+  // roomid = localStorage.getItem(connection.socketMessageEvent);
   // localStorage.setItem(connection.socketMessageEvent, roomid);
 
   // auto-join-room
   (function reCheckRoomPresence() {
     connection.checkPresence(roomid, function(isRoomExists) {
       if(isRoomExists) {
-        connection.join(roomid);
         stateChangeEnable();
+        connection.join(roomid, function() {
+          connection.extra.user = randomUser();
+          showRoomURL(roomid);
+        });
         return;
       }
 
       setTimeout(reCheckRoomPresence, 5000);
     });
   })();
-
-  // disableInputButtons();
 }
