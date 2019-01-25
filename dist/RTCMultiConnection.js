@@ -1045,7 +1045,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         }
 
         // "mozSrcObject" is always preferred over "src"!!
-        mediaElement[isFirefox ? 'mozSrcObject' : 'src'] = isFirefox ? stream : window.URL.createObjectURL(stream);
+        mediaElement[isFirefox ? 'mozSrcObject' : 'srcObject'] = stream;
         mediaElement.controls = true;
 
         // http://goo.gl/WZ5nFl
@@ -4055,7 +4055,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                     userid: connection.userid,
                     extra: connection.extra,
                     streamid: stream.streamid,
-                    blobURL: mediaElement.src || URL.createObjectURL(stream),
+                    blobURL: mediaElement.src || mediaElement.srcObject,
                     isAudioMuted: true
                 };
 
